@@ -1,92 +1,94 @@
-import '../pages/index.css';
-import { initialCards } from './components/cards.js'
-import {addCard, deleteCard, likeCard} from './components/card.js'
-import {closePopup, openPopup, keyHandlerEscape} from './components/modal.js'
+import "../pages/index.css";
+import { initialCards } from "./components/cards.js";
+import { addCard, deleteCard, likeCard } from "./components/card.js";
+import { closePopup, openPopup } from "./components/modal.js";
 
 // @todo: DOM узлы
 const cardList = document.querySelector(".places__list");
-const popupTypeNewCard = document.querySelector(".popup_type_new-card");
-const popupTypeEdit = document.querySelector(".popup_type_edit");
-const popupTypeImage = document.querySelector(".popup_type_image");
+
+const popupNewCard = document.querySelector(".popup_type_new-card");
+const cardName = popupNewCard.querySelector(".popup__input_type_card-name");
+const cardUrl = popupNewCard.querySelector(".popup__input_type_url");
+const cardFormElement = popupNewCard.querySelector(".popup__form");
+const popupCloseCard = popupNewCard.querySelector(".popup__close");
+
+const popupEditProfile = document.querySelector(".popup_type_edit");
+const popupName = popupEditProfile.querySelector(".popup__input_type_name");
+const popupDescription = popupEditProfile.querySelector(".popup__input_type_description");
+const profileFormElement = popupEditProfile.querySelector(".popup__form");
+const popupCloseEdit = popupEditProfile.querySelector(".popup__close");
+
+const popupCard = document.querySelector(".popup_type_image");
+const popupImage = popupCard.querySelector(".popup__image");
+const popupCaption = popupCard.querySelector(".popup__caption");
+const popupCloseImage = popupCard.querySelector(".popup__close");
+
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
-const popupName = popupTypeEdit.querySelector(".popup__input_type_name");
-const popupDescription = popupTypeEdit.querySelector(".popup__input_type_description");
-const formElement = document.querySelector(".popup__form");
-const cardName = popupTypeNewCard.querySelector(".popup__input_type_card-name");
-const cardUrl = popupTypeNewCard.querySelector(".popup__input_type_url");
-const popupImage =  popupTypeImage.querySelector(".popup__image");
-const popupCaption =  popupTypeImage.querySelector(".popup__caption");
 const profileEditBtn = document.querySelector(".profile__edit-button");
 const profileAddBtn = document.querySelector(".profile__add-button");
 
-popupTypeNewCard.classList.add('popup_is-animated')
-popupTypeEdit.classList.add('popup_is-animated')
-popupTypeImage.classList.add('popup_is-animated')
+popupNewCard.classList.add("popup_is-animated");
+popupEditProfile.classList.add("popup_is-animated");
+popupCard.classList.add("popup_is-animated");
 
-//open form add card
-profileAddBtn.addEventListener("click", () => {
-  const popupClose =  popupTypeNewCard.querySelector(".popup__close");
-  const formElement = popupTypeNewCard.querySelector(".popup__form");
-  
-  openPopup(popupTypeNewCard)
-  popupClose.addEventListener("click", closePopup) 
-  formElement.addEventListener('submit', handleFormSubmitAddCard);
-}) 
+//open popup add card
+profileAddBtn.addEventListener("click", () => openPopup(popupNewCard));
 
-//open form edit profile
+//open popup edit profile
 profileEditBtn.addEventListener("click", () => {
-  const popupClose = popupTypeEdit.querySelector(".popup__close");
-
-  openPopup(popupTypeEdit)
+  openPopup(popupEditProfile);
   popupName.value = profileTitle.textContent;
   popupDescription.value = profileDescription.textContent;
-  popupClose.addEventListener("click", closePopup);
-}) 
+});
 
 //when click on the card image
 const showCard = (cardElement) => {
-  const popupClose =  popupTypeImage.querySelector(".popup__close");
+  openPopup(popupCard);
+  popupImage.src = cardElement.querySelector(".card__image").src;
+  popupCaption.textContent = cardElement.querySelector(".card__description").textContent;
+};
 
-  openPopup(popupTypeImage)
-  popupImage.src=cardElement.querySelector(".card__image").src
-  popupCaption.textContent=cardElement.querySelector(".card__description").textContent
-  popupClose.addEventListener("click", closePopup)
-}
+//close popup when click on the overlay
+popupNewCard.addEventListener("click", (evt) => closePopup(evt.target));
+popupEditProfile.addEventListener("click", (evt) => closePopup(evt.target));
+popupCard.addEventListener("click", (evt) => closePopup(evt.target));
 
+//actions when click on submit in the form
+profileFormElement.addEventListener("submit", handleProfileFormSubmit);
+cardFormElement.addEventListener("submit", handleAddCardFormSubmit);
 
-//close popup when press escape
-document.addEventListener('keydown', keyHandlerEscape)
+//close card on click X
+popupCloseImage.addEventListener("click", () => closePopup(popupCard));
+popupCloseCard.addEventListener("click", () => closePopup(popupNewCard));
+popupCloseEdit.addEventListener("click", () => closePopup(popupEditProfile));
 
-//edit profile
-formElement.addEventListener('submit', handleFormSubmit);
-
-//add new card 
-function handleFormSubmitAddCard(evt) {
-  evt.preventDefault(); 
+//add new card
+function handleAddCardFormSubmit(evt) {
+  evt.preventDefault();
 
   const card = {};
   card.name = cardName.value;
-  card.link  = cardUrl.value;
+  card.link = cardUrl.value;
 
   cardList.prepend(addCard(card, deleteCard, likeCard, showCard));
-  closePopup(evt);
+  closePopup(popupNewCard);
 
-  cardName.value ='';
-  cardUrl.value ='';
+  cardName.value = "";
+  cardUrl.value = "";
 }
 
-function handleFormSubmit(evt) {
-  evt.preventDefault(); 
+//edit profile
+function handleProfileFormSubmit(evt) {
+  evt.preventDefault();
+
   profileTitle.textContent = popupName.value;
   profileDescription.textContent = popupDescription.value;
-  closePopup(evt);
+
+  closePopup(popupEditProfile);
 }
 
 // @todo: Вывести карточки на страницу
 initialCards.forEach((element) => {
   cardList.append(addCard(element, deleteCard, likeCard, showCard));
 });
-
-
-export {popupTypeNewCard, popupTypeEdit, popupTypeImage}
