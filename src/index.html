@@ -37,8 +37,10 @@
       <button type="button" class="popup__close"></button>
       <h3 class="popup__title">Редактировать профиль</h3>
       <form class="popup__form" name="edit-profile">
-        <input type="text" name="name" class="popup__input popup__input_type_name" placeholder="Имя" required>
-        <input type="text" name="description" class="popup__input popup__input_type_description" placeholder="Занятие" required>
+        <input type="text" name="name" class="popup__input popup__input_type_name" id="name-input"  data-name="small" placeholder="Имя" required>
+        <span class="form__input-error name-input-error">asd</span>
+        <input type="text" name="description" class="popup__input popup__input_type_description" id="description-input"  placeholder="Занятие" required>
+        <span class="form__input-error description-input-error">asd</span>
         <button type="submit" class="button popup__button">Сохранить</button>
       </form>
     </div>

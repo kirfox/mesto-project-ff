@@ -88,6 +88,19 @@ function handleProfileFormSubmit(evt) {
   closePopup(popupEditProfile);
 }
 
+
+
+//validate
+
+
+
+
+
+
+
+
+
+
 // @todo: Вывести карточки на страницу
 initialCards.forEach((element) => {
   cardList.append(addCard(element, deleteCard, likeCard, showCard));
