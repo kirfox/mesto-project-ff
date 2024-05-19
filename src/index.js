@@ -2,6 +2,7 @@ import "../pages/index.css";
 import { initialCards } from "./components/cards.js";
 import { addCard, deleteCard, likeCard } from "./components/card.js";
 import { closePopup, openPopup } from "./components/modal.js";
+import { enableValidation, clearValidation } from "./components/validation.js";
 
 // @todo: DOM узлы
 const cardList = document.querySelector(".places__list");
@@ -33,13 +34,42 @@ popupEditProfile.classList.add("popup_is-animated");
 popupCard.classList.add("popup_is-animated");
 
 //open popup add card
-profileAddBtn.addEventListener("click", () => openPopup(popupNewCard));
+profileAddBtn.addEventListener("click", () => {
+  
+  const validationConfig = {
+    formSelector: cardFormElement,
+    inputSelector: [cardName, cardUrl],
+    submitButtonSelector: 'popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'form__input-error_active'
+  }
+  
+  clearValidation(cardFormElement, validationConfig)
+  enableValidation(validationConfig)
+  openPopup(popupNewCard)
+
+});
 
 //open popup edit profile
 profileEditBtn.addEventListener("click", () => {
-  openPopup(popupEditProfile);
+  
+  const validationConfig = {
+    formSelector: profileFormElement,
+    inputSelector: [popupName, popupDescription],
+    submitButtonSelector: 'popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'form__input-error_active'
+  }
+
   popupName.value = profileTitle.textContent;
   popupDescription.value = profileDescription.textContent;
+
+  clearValidation(profileFormElement, validationConfig)
+  enableValidation(validationConfig)
+  openPopup(popupEditProfile);
+  
 });
 
 //when click on the card image
