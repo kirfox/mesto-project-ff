@@ -34,10 +34,6 @@ const addCard = (card, deleteCard, likeCard, showCard) => {
 
 // @todo: Функция удаления карточки
 const deleteCard = (card) => {
-
-  // deleteCardRequest(card)
-  // .catch( err => console.log(`Ошибка: ${err}`))
-
   openPopup(popupDeleteCard)
   cardFormDelete.setAttribute('id', card._id)
 };
