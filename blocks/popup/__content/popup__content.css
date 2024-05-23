@@ -9,7 +9,7 @@
   padding: 34px 36px;
 }
 
-.popup_type_edit-avatar .popup__content {
+.popup_type_edit-avatar .popup__content, .popup_type_delete .popup__content{
   min-height: 0;
 }
 

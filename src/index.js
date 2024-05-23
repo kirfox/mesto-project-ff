@@ -2,7 +2,7 @@ import "../pages/index.css";
 import { addCard, deleteCard, likeCard } from "./components/card.js";
 import { closePopup, openPopup } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
-import { getInitialCards, getProfileInfo, addCardRequest, editProfileRequest, editAvatarRequest } from "./components/api.js"
+import { getInitialCards, getProfileInfo, addCardRequest, editProfileRequest, editAvatarRequest, deleteCardRequest } from "./components/api.js"
 
 // @todo: DOM узлы
 const cardList = document.querySelector(".places__list");
@@ -35,10 +35,24 @@ const popupUrl = popupEditAvatar.querySelector(".popup__input_type_link");
 const profileFormEditAvatar = popupEditAvatar.querySelector(".popup__form");
 const popupCloseEditAvatar  = popupEditAvatar.querySelector(".popup__close");
 
+export const popupDeleteCard = document.querySelector(".popup_type_delete");
+export const cardFormDelete = popupDeleteCard.querySelector(".popup__form");
+const popupCloseDeleteCard = popupDeleteCard.querySelector(".popup__close");
+
 popupNewCard.classList.add("popup_is-animated");
 popupEditProfile.classList.add("popup_is-animated");
 popupCard.classList.add("popup_is-animated");
 popupEditAvatar.classList.add("popup_is-animated");
+popupDeleteCard.classList.add("popup_is-animated");
+
+//get profile info
+getProfileInfo()
+  .then((result) => {
+      profileTitle.textContent = result.name;
+      profileDescription.textContent = result.about; 
+      profileAvatar.style.backgroundImage = `url(${result.avatar})`;
+  })
+  .catch( err => console.log(`Ошибка: ${err}`))
 
 //open popup add card
 profileAddBtn.addEventListener("click", () => {
@@ -55,7 +69,6 @@ profileAddBtn.addEventListener("click", () => {
   clearValidation(cardFormElement, validationConfig)
   enableValidation(validationConfig)
   openPopup(popupNewCard)
-
 });
 
 //open popup edit profile
@@ -76,7 +89,6 @@ profileEditBtn.addEventListener("click", () => {
   clearValidation(profileFormElement, validationConfig)
   enableValidation(validationConfig)
   openPopup(popupEditProfile);
-  
 });
 
 //open popup edit profile avatar
@@ -108,17 +120,20 @@ popupNewCard.addEventListener("click", (evt) => closePopup(evt.target));
 popupEditProfile.addEventListener("click", (evt) => closePopup(evt.target));
 popupCard.addEventListener("click", (evt) => closePopup(evt.target));
 popupEditAvatar.addEventListener("click", (evt) => closePopup(evt.target));
+popupDeleteCard.addEventListener("click", (evt) => closePopup(evt.target));
 
 //actions when click on submit in the form
 profileFormElement.addEventListener("submit", handleProfileFormSubmit);
 cardFormElement.addEventListener("submit", handleAddCardFormSubmit);
 profileFormEditAvatar.addEventListener("submit", handleEditAvatarFormSubmit);
+cardFormDelete.addEventListener("submit", handleCardDeleteSubmit);
 
 //close card on click X
 popupCloseImage.addEventListener("click", () => closePopup(popupCard));
 popupCloseCard.addEventListener("click", () => closePopup(popupNewCard));
 popupCloseEdit.addEventListener("click", () => closePopup(popupEditProfile));
 popupCloseEditAvatar.addEventListener("click", () => closePopup(popupEditAvatar));
+popupCloseDeleteCard.addEventListener("click", () => closePopup(popupDeleteCard));
 
 //add new card
 function handleAddCardFormSubmit(evt) {
@@ -128,7 +143,7 @@ function handleAddCardFormSubmit(evt) {
   btn.textContent = 'Сохранить...'
 
   addCardRequest(cardName, cardUrl)
-    .catch( err => renderError(`Ошибка: ${err}`))
+    .catch( err => console.log(`Ошибка: ${err}`))
     .finally(() => btn.textContent = 'Сохранить')
 
   closePopup(popupNewCard);
@@ -165,16 +180,13 @@ function handleEditAvatarFormSubmit(evt) {
   closePopup(popupEditAvatar);
 }
 
+//delete card
+function handleCardDeleteSubmit(evt) {
+  evt.preventDefault();
+  deleteCardRequest(evt.target.id)
 
-//get profile info
-getProfileInfo()
-  .then((result) => {
-      profileTitle.textContent = result.name;
-      profileDescription.textContent = result.about; 
-      profileAvatar.style.backgroundImage = `url(${result.avatar})`;
-  })
-  .catch( err => console.log(`Ошибка: ${err}`))
-
+  closePopup(popupDeleteCard);
+}
 
 //Вывести карточки на страницу
 Promise.all([getInitialCards()]).then((res) =>  {

@@ -1,4 +1,6 @@
 import { deleteCardRequest, likePutRequest, likeDeleteRequest } from "../components/api.js";
+import { openPopup } from "./modal.js";
+import { popupDeleteCard, cardFormDelete } from "../index.js"
 
 // @todo: Темплейт карточки
 const cardTemplate = document.querySelector("#card-template").content;
@@ -10,7 +12,7 @@ const addCard = (card, deleteCard, likeCard, showCard) => {
     const likeBtn = cardElement.querySelector(".card__like-button"); 
     const cardImage = cardElement.querySelector(".card__image"); 
     const likeCount = cardElement.querySelector(".card__like-count"); 
-    // console.log(card);
+    
     if (card.owner._id !== "34dde54b084d6798c88ac757") deleteBtn.remove();
 
     if (card.likes.length > 0) {
@@ -29,11 +31,15 @@ const addCard = (card, deleteCard, likeCard, showCard) => {
     cardImage.addEventListener("click", () => showCard(cardElement));
     return cardElement;
   };
-  
+
 // @todo: Функция удаления карточки
 const deleteCard = (card) => {
-  deleteCardRequest(card)
-  .catch( err => console.log(`Ошибка: ${err}`))
+
+  // deleteCardRequest(card)
+  // .catch( err => console.log(`Ошибка: ${err}`))
+
+  openPopup(popupDeleteCard)
+  cardFormDelete.setAttribute('id', card._id)
 };
 
 //like

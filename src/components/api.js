@@ -17,7 +17,6 @@ export const getInitialCards = () => {
       });
 } 
 
-//get profile info
 export const getProfileInfo = () => {
     return fetch(`${config.baseUrl}/users/me`, {
         headers: config.headers
@@ -28,9 +27,8 @@ export const getProfileInfo = () => {
     })
 }
 
-
-export const deleteCardRequest = (card) => {
-    return fetch(`${config.baseUrl}/cards/${card._id}`, {
+export const deleteCardRequest = (card_id) => {
+    return fetch(`${config.baseUrl}/cards/${card_id}`, {
         method: 'DELETE',
         headers: config.headers
     })
