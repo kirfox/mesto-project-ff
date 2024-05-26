@@ -1,9 +1,9 @@
 const enableValidation = ((validationConfig) => {
-    
+
     const btn = validationConfig.formSelector.querySelector(`.${validationConfig.submitButtonSelector}`)
     
     validationConfig.inputSelector.forEach(inputElement => {
-        
+    
         inputElement.addEventListener('input', function () {
             const errorElement = validationConfig.formSelector.querySelector(`.${inputElement.id}-error`)
             

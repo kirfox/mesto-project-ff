@@ -1,9 +1,10 @@
 import "../pages/index.css";
-import { addCard, deleteCard, likeCard } from "./components/card.js";
+import { addCard, likeCard } from "./components/card.js";
 import { closePopup, openPopup } from "./components/modal.js";
 import { enableValidation, clearValidation } from "./components/validation.js";
 import { getInitialCards, getProfileInfo, addCardRequest, editProfileRequest, editAvatarRequest, deleteCardRequest } from "./components/api.js"
 
+let userId;
 // @todo: DOM узлы
 const cardList = document.querySelector(".places__list");
 
@@ -35,8 +36,8 @@ const popupUrl = popupEditAvatar.querySelector(".popup__input_type_link");
 const profileFormEditAvatar = popupEditAvatar.querySelector(".popup__form");
 const popupCloseEditAvatar  = popupEditAvatar.querySelector(".popup__close");
 
-export const popupDeleteCard = document.querySelector(".popup_type_delete");
-export const cardFormDelete = popupDeleteCard.querySelector(".popup__form");
+const popupDeleteCard = document.querySelector(".popup_type_delete");
+const cardFormDelete = popupDeleteCard.querySelector(".popup__form");
 const popupCloseDeleteCard = popupDeleteCard.querySelector(".popup__close");
 
 popupNewCard.classList.add("popup_is-animated");
@@ -45,74 +46,80 @@ popupCard.classList.add("popup_is-animated");
 popupEditAvatar.classList.add("popup_is-animated");
 popupDeleteCard.classList.add("popup_is-animated");
 
-//get profile info
-getProfileInfo()
-  .then((result) => {
-      profileTitle.textContent = result.name;
-      profileDescription.textContent = result.about; 
-      profileAvatar.style.backgroundImage = `url(${result.avatar})`;
-  })
+
+const validationConfigAddCard = {
+  formSelector: cardFormElement,
+  inputSelector: [cardName, cardUrl],
+  submitButtonSelector: 'popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'form__input-error_active'
+}
+
+const validationConfigEditProfile = {
+  formSelector: profileFormElement,
+  inputSelector: [popupName, popupDescription],
+  submitButtonSelector: 'popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'form__input-error_active'
+}
+
+const validationConfigEditAvatar = {
+  formSelector: profileFormEditAvatar,
+  inputSelector: [popupUrl],
+  submitButtonSelector: 'popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'form__input-error_active'
+}
+
+enableValidation(validationConfigAddCard)
+enableValidation(validationConfigEditProfile)
+enableValidation(validationConfigEditAvatar)
+
+//Вывести карточки на страницу и получить инфу профиля  
+Promise.all([ getProfileInfo(), getInitialCards()]).then(([profile, cards]) =>  {
+  
+  profileTitle.textContent = profile.name;
+  profileDescription.textContent = profile.about; 
+  profileAvatar.style.backgroundImage = `url(${profile.avatar})`;
+  userId = profile._id;
+
+  cards.forEach((element) => {
+    cardList.append(addCard(userId, element, deleteCard, likeCard, showCard));
+  });
+})
   .catch( err => console.log(`Ошибка: ${err}`))
+
 
 //open popup add card
 profileAddBtn.addEventListener("click", () => {
-  
-  const validationConfig = {
-    formSelector: cardFormElement,
-    inputSelector: [cardName, cardUrl],
-    submitButtonSelector: 'popup__button',
-    inactiveButtonClass: 'popup__button_disabled',
-    inputErrorClass: 'popup__input_type_error',
-    errorClass: 'form__input-error_active'
-  }
-  
-  clearValidation(cardFormElement, validationConfig)
-  enableValidation(validationConfig)
+  clearValidation(cardFormElement, validationConfigAddCard)
   openPopup(popupNewCard)
 });
 
 //open popup edit profile
 profileEditBtn.addEventListener("click", () => {
   
-  const validationConfig = {
-    formSelector: profileFormElement,
-    inputSelector: [popupName, popupDescription],
-    submitButtonSelector: 'popup__button',
-    inactiveButtonClass: 'popup__button_disabled',
-    inputErrorClass: 'popup__input_type_error',
-    errorClass: 'form__input-error_active'
-  }
-
   popupName.value = profileTitle.textContent;
   popupDescription.value = profileDescription.textContent;
 
-  clearValidation(profileFormElement, validationConfig)
-  enableValidation(validationConfig)
+  clearValidation(profileFormElement, validationConfigEditProfile)
   openPopup(popupEditProfile);
 });
 
 //open popup edit profile avatar
 profileAvatar.addEventListener("click", () => {
-
-  const validationConfig = {
-    formSelector: profileFormEditAvatar,
-    inputSelector: [popupUrl],
-    submitButtonSelector: 'popup__button',
-    inactiveButtonClass: 'popup__button_disabled',
-    inputErrorClass: 'popup__input_type_error',
-    errorClass: 'form__input-error_active'
-  }
-  
-  clearValidation(profileFormEditAvatar, validationConfig)
-  enableValidation(validationConfig)
+  clearValidation(profileFormEditAvatar, validationConfigEditAvatar)
   openPopup(popupEditAvatar);
 })
 
 //when click on the card image
-const showCard = (cardElement) => {
+const showCard = (name, link) => {
   openPopup(popupCard);
-  popupImage.src = cardElement.querySelector(".card__image").src;
-  popupCaption.textContent = cardElement.querySelector(".card__description").textContent;
+  popupImage.src = link;
+  popupCaption.textContent = name;
 };
 
 //close popup when click on the overlay
@@ -143,13 +150,17 @@ function handleAddCardFormSubmit(evt) {
   btn.textContent = 'Сохранить...'
 
   addCardRequest(cardName, cardUrl)
+    .then((card) => {
+      cardList.prepend(addCard(userId, card, deleteCard, likeCard, showCard));
+      closePopup(popupNewCard);
+      clearValidation(cardFormElement, validationConfigAddCard)
+    })
     .catch( err => console.log(`Ошибка: ${err}`))
-    .finally(() => btn.textContent = 'Сохранить')
-
-  closePopup(popupNewCard);
-
-  cardName.value = "";
-  cardUrl.value = "";
+    .finally(() => {
+      btn.textContent = 'Сохранить'
+      cardName.value = "";
+      cardUrl.value = "";
+    })
 }
 
 //edit profile
@@ -160,10 +171,16 @@ function handleProfileFormSubmit(evt) {
   btn.textContent = 'Сохранить...'
 
   editProfileRequest(popupName, popupDescription)
+    .then((res) => {
+      profileTitle.textContent = res.name;
+      profileDescription.textContent = res.about;
+      closePopup(popupEditProfile);
+      clearValidation(profileFormEditAvatar, validationConfigEditAvatar)
+    })
     .catch( err => console.log(`Ошибка: ${err}`))
     .finally(() => btn.textContent = 'Сохранить')
 
-  closePopup(popupEditProfile);
+  
 }
 
 //edit avatar profile
@@ -174,24 +191,33 @@ function handleEditAvatarFormSubmit(evt) {
   btn.textContent = 'Сохранить...'
 
   editAvatarRequest(popupUrl)
+    .then(res => {
+      profileAvatar.style.backgroundImage = `url(${res.avatar})`;
+      closePopup(popupEditAvatar);
+      clearValidation(profileFormEditAvatar, validationConfigEditAvatar)
+    })
     .catch( err => console.log(`Ошибка: ${err}`))
     .finally(() => btn.textContent = 'Сохранить')
-
-  closePopup(popupEditAvatar);
 }
+
+
+// @todo: Функция удаления карточки
+const deleteCard = (cardElement, card) => {
+  openPopup(popupDeleteCard)
+  cardFormDelete.setAttribute('id', card._id)
+  cardElement.setAttribute('id', card._id)
+};
+
 
 //delete card
 function handleCardDeleteSubmit(evt) {
   evt.preventDefault();
   deleteCardRequest(evt.target.id)
-
-  closePopup(popupDeleteCard);
+    .then(() => {
+      const card = cardList.querySelector(`#${CSS.escape(evt.target.id)}`);
+      card.remove()
+      closePopup(popupDeleteCard);
+    })
+    .catch( err => console.log(`Ошибка: ${err}`))
+  
 }
-
-//Вывести карточки на страницу
-Promise.all([getInitialCards()]).then((res) =>  {
-  res[0].forEach((element) => {
-      cardList.append(addCard(element, deleteCard, likeCard, showCard));
-    });
-})
-  .catch( err => console.log(`Ошибка: ${err}`))
