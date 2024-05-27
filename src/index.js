@@ -123,11 +123,11 @@ const showCard = (name, link) => {
 };
 
 //close popup when click on the overlay
-popupNewCard.addEventListener("click", (evt) => closePopup(evt.target));
-popupEditProfile.addEventListener("click", (evt) => closePopup(evt.target));
-popupCard.addEventListener("click", (evt) => closePopup(evt.target));
-popupEditAvatar.addEventListener("click", (evt) => closePopup(evt.target));
-popupDeleteCard.addEventListener("click", (evt) => closePopup(evt.target));
+popupNewCard.addEventListener("mousedown", (evt) => closePopup(evt.target));
+popupEditProfile.addEventListener("mousedown", (evt) => closePopup(evt.target));
+popupCard.addEventListener("mousedown", (evt) => closePopup(evt.target));
+popupEditAvatar.addEventListener("mousedown", (evt) => closePopup(evt.target));
+popupDeleteCard.addEventListener("mousedown", (evt) => closePopup(evt.target));
 
 //actions when click on submit in the form
 profileFormElement.addEventListener("submit", handleProfileFormSubmit);
@@ -154,12 +154,12 @@ function handleAddCardFormSubmit(evt) {
       cardList.prepend(addCard(userId, card, deleteCard, likeCard, showCard));
       closePopup(popupNewCard);
       clearValidation(cardFormElement, validationConfigAddCard)
+      cardName.value = "";
+      cardUrl.value = "";
     })
     .catch( err => console.log(`Ошибка: ${err}`))
     .finally(() => {
       btn.textContent = 'Сохранить'
-      cardName.value = "";
-      cardUrl.value = "";
     })
 }
 
